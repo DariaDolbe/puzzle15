@@ -12,21 +12,24 @@ namespace puzzle15
 {
     public partial class Puzzle : Form
     {
+        Random rand = new Random();
+
         public Puzzle()
         {
             InitializeComponent();
-            InitializePuzzle();
-            InitializePuzzleBlocks();
+            InitializePuzzleArea();
+            InitializeBlocks();
+            ShuffleBlocks();
         }
 
-        private void InitializePuzzle()
+        private void InitializePuzzleArea()
         {
             this.BackColor = Color.DarkSlateBlue;
-            this.Text = "Puzzle 15";
+            this.Text = "Puzzle15";
             this.ClientSize = new Size(500, 500);
         }
 
-        private void InitializePuzzleBlocks()
+        private void InitializeBlocks()
         {
             int blockCount = 1;
             PuzzleBlock block;
@@ -34,30 +37,35 @@ namespace puzzle15
             {
                 for (int col = 1; col < 5; col++)
                 {
-                    block = new PuzzleBlock();
-                    block.Top = row * 84;
-                    block.Left = col * 84;
-                    block.Text = blockCount.ToString();
+                    block = new PuzzleBlock()
+                    {
+                        Top = row * 84,
+                        Left = col * 84,
+                        Text = blockCount.ToString(),
+                        Name = "Block" + blockCount.ToString()
+                    };
 
-                    block.Click += new EventHandler(Block_Click);
+                    //block.Click += new EventHandler(Block_Click);
+                    block.Click += Block_Click;
 
                     if (blockCount == 16)
                     {
-                        block.Name = "Emptyblock";
+                        block.Name = "EmptyBlock";
                         block.Text = string.Empty;
                         block.BackColor = Color.SlateGray;
+                        block.FlatStyle = FlatStyle.Flat;
+                        block.FlatAppearance.BorderSize = 0;
                     }
-                    this.Controls.Add(block);
                     blockCount++;
+                    this.Controls.Add(block);
                 }
-
             }
         }
 
-        private void Block_Click (object sender, EventArgs e)
+        private void Block_Click(object sender, EventArgs e)
         {
             Button block = (Button)sender;
-            if (IsAdjanced(block))
+            if (IsAdjacent(block))
             {
                 SwapBlocks(block);
             }
@@ -71,16 +79,16 @@ namespace puzzle15
             emptyBlock.Location = oldLocation;
         }
 
-        private bool IsAdjanced (Button block)
+        private bool IsAdjacent(Button block)
         {
             double a;
             double b;
             double c;
             Button emptyBlock = (Button)this.Controls["EmptyBlock"];
+
             a = Math.Abs(emptyBlock.Top - block.Top);
             b = Math.Abs(emptyBlock.Left - block.Left);
             c = Math.Sqrt(Math.Pow(a, 2) + Math.Pow(b, 2));
-
             if (c < 85)
             {
                 return true;
@@ -89,6 +97,26 @@ namespace puzzle15
             {
                 return false;
             }
+        }
+
+        private void ShuffleBlocks()
+        {
+            int randNumber;
+            string blockName;
+            Button block;
+
+            for (int i = 0; i < 100; i++)
+            {
+                randNumber = rand.Next(1, 16);
+                blockName = "Block" + randNumber.ToString();
+                block = (Button)this.Controls[blockName];
+                SwapBlocks(block);
+            }
+        }
+
+        private void newToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ShuffleBlocks();
         }
     }
 }
